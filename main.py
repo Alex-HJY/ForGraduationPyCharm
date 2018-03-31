@@ -1,15 +1,26 @@
-# encoding=utf-8
-
-import pandas
+# coding=utf-8
 import numpy as np
 import math
-import pymysql
+import pymysql as mysql
 import matplotlib as plb
 import pandas as pd
-import keras as kr
 
 
-d = { 'Adam': 95, 'Lisa': 85, 'Bart': 59, 'Paul': 74 }
-def func(a,b,f):
-    return f(a)+f(b)
-print(abs)
+def List_Where():
+    db = mysql.connect(host="localhost", user="root", password="123456789", db="test", port=3306, charset='utf8')
+    cur = db.cursor()
+    fromwhere = []
+    sql = "select * from dataset"
+    cur.execute(sql)
+    result = cur.fetchall()
+    for row in result:
+        s = row[2] + row[3] + row[4] + row[5]
+        fromwhere.append(s)
+    fromwhere = list(set(fromwhere))
+    fromwhere.sort()
+    cur.close()
+    db.close()
+    return fromwhere
+
+
+Where=List_Where()

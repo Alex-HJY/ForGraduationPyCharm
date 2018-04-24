@@ -110,7 +110,7 @@ train_x_list=train_data.tolist()
 L, suppData = Apriori.apriori(train_x_list, minSupport=0.1 )
 rules=Apriori.generateRules(L,suppData,minConf=0.7)
 print ("频繁项集L：", L)
-print ("所有候选项集的支持度信息：", suppData)k
+print ("所有候选项集的支持度信息：", suppData)
 print ("关联规则：", rules)
 
 rules.sort()

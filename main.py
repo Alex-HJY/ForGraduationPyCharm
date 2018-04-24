@@ -4,7 +4,8 @@ import math
 import pymysql as mysql
 import matplotlib as plb
 import pandas as pd
-
+import sklearn.cluster as skc
+from sklearn import datasets
 
 def List_Where():
     db = mysql.connect(host="localhost", user="root", password="123456789", db="test", port=3306, charset='utf8')

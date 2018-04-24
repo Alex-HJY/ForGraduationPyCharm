@@ -1,173 +1,107 @@
 ﻿# -*- coding: utf-8 -*-
-"""
-Apriori exercise.
-Created on Fri Nov 27 11:09:03 2015
 
-@author: 90Zeng
-"""
+from numpy import *
 
 
 def loadDataSet():
-    '''创建一个用于测试的简单的数据集'''
     return [[1, 3, 4], [2, 3, 5], [1, 2, 3, 5], [2, 5]]
 
-
+# C1 是大小为1的所有候选项集的集合
 def createC1(dataSet):
-    '''
-    构建初始候选项集的列表，即所有候选项集只包含一个元素，
-    C1是大小为1的所有候选项集的集合
-    '''
     C1 = []
     for transaction in dataSet:
         for item in transaction:
-            if [item] not in C1:
-                C1.append([item])
+            if not [item] in C1:
+                C1.append([item]) #store all the item unrepeatly
+
     C1.sort()
-    return map(frozenset, C1)
+    #return map(frozenset, C1)#frozen set, user can't change it.
+    return list(map(frozenset, C1))
 
-
-def scanD(D, Ck, minSupport):
-    '''
-    计算Ck中的项集在数据集合D(记录或者transactions)中的支持度,
-    返回满足最小支持度的项集的集合，和所有项集支持度信息的字典。
-    '''
-    ssCnt = {}
-    for tid in D:
-        # 对于每一条transaction
-        for can in Ck:
-            # 对于每一个候选项集can，检查是否是transaction的一部分
-            # 即该候选can是否得到transaction的支持
-            if can.issubset(tid):
-                ssCnt[can] = ssCnt.get(can, 0) + 1
-    numItems = float(len(D))
-    retList = []
-    supportData = {}
+#该函数用于从 C1 生成 L1 。
+def scanD(D,Ck,minSupport):
+#参数：数据集、候选项集列表 Ck以及感兴趣项集的最小支持度 minSupport
+    ssCnt={}
+    for tid in D:#遍历数据集
+        for can in Ck:#遍历候选项
+            if can.issubset(tid):#判断候选项中是否含数据集的各项
+                #if not ssCnt.has_key(can): # python3 can not support
+                if not can in ssCnt:
+                    ssCnt[can]=1 #不含设为1
+                else: ssCnt[can]+=1#有则计数加1
+    numItems=float(len(D))#数据集大小
+    retList = []#L1初始化
+    supportData = {}#记录候选项中各个数据的支持度
     for key in ssCnt:
-        # 每个项集的支持度
-        support = ssCnt[key] / numItems
-
-        # 将满足最小支持度的项集，加入retList
+        support = ssCnt[key]/numItems#计算支持度
         if support >= minSupport:
-            retList.insert(0, key)
-
-        # 汇总支持度数据
+            retList.insert(0,key)#满足条件加入L1中
         supportData[key] = support
     return retList, supportData
 
-
-
-# Aprior算法
-def aprioriGen(Lk, k):
-    '''
-    由初始候选项集的集合Lk生成新的生成候选项集，
-    k表示生成的新项集中所含有的元素个数
-    '''
+#total apriori
+def aprioriGen(Lk, k): #组合，向上合并
+    #creates Ck 参数：频繁项集列表 Lk 与项集元素个数 k
     retList = []
     lenLk = len(Lk)
     for i in range(lenLk):
-        for j in range(i + 1, lenLk):
-            L1 = list(Lk[i])[: k - 2];
-            L2 = list(Lk[j])[: k - 2];
-            L1.sort();
-            L2.sort()
-            if L1 == L2:
-                retList.append(Lk[i] | Lk[j])
+        for j in range(i+1, lenLk): #两两组合遍历
+            L1 = list(Lk[i])[:k-2]; L2 = list(Lk[j])[:k-2]
+            L1.sort(); L2.sort()
+            if L1==L2: #若两个集合的前k-2个项相同时,则将两个集合合并
+                retList.append(Lk[i] | Lk[j]) #set union
     return retList
 
-
-def apriori(dataSet, minSupport=0.5):
-    # 构建初始候选项集C1
+#apriori
+def apriori(dataSet, minSupport = 0.5):
     C1 = createC1(dataSet)
-
-    # 将dataSet集合化，以满足scanD的格式要求
-    D = map(set, dataSet)
-
-    # 构建初始的频繁项集，即所有项集只有一个元素
-    L1, suppData = scanD(D, C1, minSupport)
+    D = list(map(set, dataSet)) #python3
+    L1, supportData = scanD(D, C1, minSupport)#单项最小支持度判断 0.5，生成L1
     L = [L1]
-    # 最初的L1中的每个项集含有一个元素，新生成的
-    # 项集应该含有2个元素，所以 k=2
     k = 2
-
-    while (len(L[k - 2]) > 0):
-        Ck = aprioriGen(L[k - 2], k)
-        Lk, supK = scanD(D, Ck, minSupport)
-
-        # 将新的项集的支持度数据加入原来的总支持度字典中
-        suppData.update(supK)
-
-        # 将符合最小支持度要求的项集加入L
+    while (len(L[k-2]) > 0):#创建包含更大项集的更大列表,直到下一个大的项集为空
+        Ck = aprioriGen(L[k-2], k)#Ck
+        Lk, supK = scanD(D, Ck, minSupport)#get Lk
+        supportData.update(supK)
         L.append(Lk)
-
-        # 新生成的项集中的元素个数应不断增加
         k += 1
-    # 返回所有满足条件的频繁项集的列表，和所有候选项集的支持度信息
-    return L, suppData
-
-
-
-
-# 规则生成与评价
-def calcConf(freqSet, H, supportData, brl, minConf=0.7):
-    '''
-    计算规则的可信度，返回满足最小可信度的规则。
-
-    freqSet(frozenset):频繁项集
-    H(frozenset):频繁项集中所有的元素
-    supportData(dic):频繁项集中所有元素的支持度
-    brl(tuple):满足可信度条件的关联规则
-    minConf(float):最小可信度
-    '''
-    prunedH = []
-    for conseq in H:
-        conf = supportData[freqSet] / supportData[freqSet - conseq]
-        if conf >= minConf:
-            print
-            freqSet - conseq, '-->', conseq, 'conf:', conf
-            brl.append((freqSet - conseq, conseq, conf))
-            prunedH.append(conseq)
-    return prunedH
-
-
-def rulesFromConseq(freqSet, H, supportData, brl, minConf=0.7):
-    '''
-    对频繁项集中元素超过2的项集进行合并。
-
-    freqSet(frozenset):频繁项集
-    H(frozenset):频繁项集中的所有元素，即可以出现在规则右部的元素
-    supportData(dict):所有项集的支持度信息
-    brl(tuple):生成的规则
-
-    '''
-    m = len(H[0])
-
-    # 查看频繁项集是否大到移除大小为 m　的子集
-    if len(freqSet) > m + 1:
-        Hmp1 = aprioriGen(H, m + 1)
-        Hmp1 = calcConf(freqSet, Hmp1, supportData, brl, minConf)
-
-        # 如果不止一条规则满足要求，进一步递归合并
-        if len(Hmp1) > 1:
-            rulesFromConseq(freqSet, Hmp1, supportData, brl, minConf)
-
+    return L, supportData
 
 def generateRules(L, supportData, minConf=0.7):
-    '''
-    根据频繁项集和最小可信度生成规则。
-
-    L(list):存储频繁项集
-    supportData(dict):存储着所有项集（不仅仅是频繁项集）的支持度
-    minConf(float):最小可信度
-    '''
-    bigRuleList = []
-    for i in range(1, len(L)):
+    #频繁项集列表、包含那些频繁项集支持数据的字典、最小可信度阈值
+    bigRuleList = [] #存储所有的关联规则
+    for i in range(1, len(L)):  #只获取有两个或者更多集合的项目，从1,即第二个元素开始，L[0]是单个元素的
+        # 两个及以上的才可能有关联一说，单个元素的项集不存在关联问题
         for freqSet in L[i]:
-            # 对于每一个频繁项集的集合freqSet
             H1 = [frozenset([item]) for item in freqSet]
-
-            # 如果频繁项集中的元素个数大于2，需要进一步合并
-            if i > 1:
+            #该函数遍历L中的每一个频繁项集并对每个频繁项集创建只包含单个元素集合的列表H1
+            if (i > 1):
+            #如果频繁项集元素数目超过2,那么会考虑对它做进一步的合并
                 rulesFromConseq(freqSet, H1, supportData, bigRuleList, minConf)
-            else:
-                calcConf(freqSet, H1, supportData, bigRuleList, minConf)
+            else:#第一层时，后件数为1
+                calcConf(freqSet, H1, supportData, bigRuleList, minConf)# 调用函数2
     return bigRuleList
+
+#生成候选规则集合：计算规则的可信度以及找到满足最小可信度要求的规则
+def calcConf(freqSet, H, supportData, brl, minConf=0.7):
+    #针对项集中只有两个元素时，计算可信度
+    prunedH = []#返回一个满足最小可信度要求的规则列表
+    for conseq in H:#后件，遍历 H中的所有项集并计算它们的可信度值
+        conf = supportData[freqSet]/supportData[freqSet-conseq] #可信度计算，结合支持度数据
+        if conf >= minConf:
+            print (freqSet-conseq,'-->',conseq,'conf:',conf)
+            #如果某条规则满足最小可信度值,那么将这些规则输出到屏幕显示
+            brl.append((freqSet-conseq, conseq, conf))#添加到规则里，brl 是前面通过检查的 bigRuleList
+            prunedH.append(conseq)#同样需要放入列表到后面检查
+    return prunedH
+
+#合并
+def rulesFromConseq(freqSet, H, supportData, brl, minConf=0.7):
+    #参数:一个是频繁项集,另一个是可以出现在规则右部的元素列表 H
+    m = len(H[0])
+    if (len(freqSet) > (m + 1)): #频繁项集元素数目大于单个集合的元素数
+        Hmp1 = aprioriGen(H, m+1)#存在不同顺序、元素相同的集合，合并具有相同部分的集合
+        Hmp1 = calcConf(freqSet, Hmp1, supportData, brl, minConf)#计算可信度
+        if (len(Hmp1) > 1):
+        #满足最小可信度要求的规则列表多于1,则递归来判断是否可以进一步组合这些规则
+            rulesFromConseq(freqSet, Hmp1, supportData, brl, minConf)

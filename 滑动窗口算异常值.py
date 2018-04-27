@@ -16,7 +16,7 @@ from scipy.interpolate import lagrange
 
 name = ['ch4', 'c2h6', 'c2h4', 'c2h2', 'h2', 'co', 'co2', 'water']
 
-def read_mysql(sql='select * from test.total where transformer like \'省检修分公司南京分部东善桥变重庆ABB变压器有限公司2号主变A相\''):  # 读取数据
+def read_mysql(sql='select * from test.total where transformer like \'省检修分公司苏州分部车坊变特工变电沈阳变压器集团有限公司1号主变A相\''):  # 读取数据
     try:
         conn = pymysql.connect(host="localhost", user="root", password="123456789", db="test", port=3306,
                                charset='utf8')
@@ -84,8 +84,11 @@ def getwrongbypoly(df=[],w=5,wucha=0.13):
     print(ans.__len__())
     return ans
 
-def getwrong(df=[],w=10,wucha=2):
+def getwrong(df=[],w=10,wucha=2,lieshu=3):
     ans = []
+    temp=[]
+    for kkk in range(w+1):
+        temp.append(0)
     for j in range(3,11):
         for i in range(w+1,len(df)):
             t1=[]
@@ -95,17 +98,31 @@ def getwrong(df=[],w=10,wucha=2):
                 t1.append(df[k][j])
             avg1=sum(t1)/t1.__len__()
             for k in range(t1.__len__()):
-                avgz=avgz+(t1[k]-avg)*(t1[k]-avg)
+                # avgz=avgz+(t1[k]-avg1)*(t1[k]-avg1)
+                avgz = avgz +abs( (t1[k] - avg1))
             avgz=avgz/t1.__len__()
-            avgmax=avg1+3*avgz
-            avgmin = avg1 - 3 * avgz
+            avgmax=avg1+6*avgz
+            avgmin = avg1 - 6 * avgz
+            ttt=0
             # print(tt,' ',avg,' ',df[i][j])
             if df[i][j]<avgmin or df [i][j]>avgmax :
-                print(avgmin, ' ', avgmax, ' ', df[i][j])
-                df[i].append((name[j-3],j,avg1))
+                print(avgmin, ' ', avgmax, ' ', df[i][j],avgz,avg1)
+                ttt=df[i][j]
+                df[i].append((name[j-3],j,avg1,avgz))
                 ans.append(df[i])
+            if j == lieshu:
+                temp.append(ttt)
     print(ans.__len__())
     pd.DataFrame(df).to_excel('C:/Users/Alex/Desktop/T.xls')
+    x=[]
+    y=[]
+    for i in range(df.__len__()):
+        x.append(df[i][2])
+        y.append(df[i][lieshu])
+    plt.plot(x,y,marker='.')
+    print(x.__len__(),temp.__len__())
+    plt.plot(x,temp,marker='o')
+    plt.show()
     return ans
 
 

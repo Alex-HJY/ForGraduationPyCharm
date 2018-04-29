@@ -17,7 +17,7 @@ def read_mysql(sql='select * from test.total '):  # 读取数据
         conn = pymysql.connect(host="localhost", user="root", password="123456789", db="test", port=3306,
                                charset='utf8')
     except pymysql.err.OperationalError as e:
-        print('Error is ' + str(e))
+        print('Error is ' + st(e))
     try:
         engine = sqlalchemy.create_engine('mysql+pymysql://root:123456789@localhost:3306/test')
     except sqlalchemy.exc.OperationalError as e:

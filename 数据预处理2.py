@@ -17,6 +17,7 @@ from scipy.interpolate import lagrange
 
 # 省检修分公司南京分部东善桥变重庆ABB变压器有限公司1号主变B相
 
+#读取数据
 def read_mysql(sql='select * from test.total where transformer like \'省检修分公司南京分部东善桥变重庆ABB变压器有限公司2号主变A相\''):  # 读取数据
     try:
         conn = pymysql.connect(host="localhost", user="root", password="123456789", db="test", port=3306,
@@ -41,13 +42,13 @@ def read_mysql(sql='select * from test.total where transformer like \'省检修�
     return df
 
 
-def ployinterp_column(s, n, k=5):
+def ployinterp_column(s, n, k=5):  #弗洛伊德插值
     y = s[list(range(n - k, n)) + list(range(n + 1, n + 1 + k))]
     y = y[y.notnull()]
     return lagrange(y.index, list(y))(n)
 
 
-def meaninterp_column(s, n, k=5):
+def meaninterp_column(s, n, k=5):   #平均值插值
     y = s[list(range(n - k, n)) + list(range(n + 1, n + 1 + k))]
     y = y[y.notnull()]
     return sum(y) / len(y)
@@ -55,7 +56,7 @@ def meaninterp_column(s, n, k=5):
 
 df = read_mysql()
 # df.to_excel('C:/Users/Alex/Desktop/TETS.xls')
-print(df.iloc[0])
+
 for i in df.columns:
     for j in range(len(df)):
         if (df[i].isnull())[j]:

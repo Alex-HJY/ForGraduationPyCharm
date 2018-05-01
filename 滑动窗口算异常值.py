@@ -1,4 +1,6 @@
 # coding=utf-8
+import copy
+
 import numpy as np
 import math
 import pymysql
@@ -106,10 +108,13 @@ def getwronglunwen(df=[], w=10, wucha=2):
     return ans
 
 
-def printgraph(df=[], wrongdata=[], lieshu=[3]):
+def printgraph(df=[], wrongdata=[], lieshu=[3],df_fix=[]):
     for row in lieshu:
+
         x = []
         y = []
+        xfix = []
+        yfix = []
         xx1 = []
         yy1 = []
         xx0 = []
@@ -117,6 +122,8 @@ def printgraph(df=[], wrongdata=[], lieshu=[3]):
         for i in range(df.__len__()):
             x.append(df[i][2])
             y.append(df[i][row])
+            xfix.append(df_fix[i][2])
+            yfix.append(df_fix[i][row])
         for i in wrongdata[row - 3]:
             if i[3] == 1:
                 xx1.append(i[1])
@@ -125,14 +132,15 @@ def printgraph(df=[], wrongdata=[], lieshu=[3]):
                 xx0.append(i[1])
                 yy0.append(i[2])
         plt.scatter(xx1, yy1, c='r', marker='x', zorder=2)
-        plt.scatter(xx0, yy0, c='y', marker='o', zorder=2)
+        plt.scatter(xx0, yy0, c='y', marker='>', zorder=2)
         plt.title(name[row - 3], fontsize=12)
-        plt.plot(x, y, marker='.', zorder=1)
+        plt.plot(x, y,zorder=1)
+        plt.plot(xfix, yfix, c='k', zorder=0)
         plt.show()
     return
 
 
-def getwrong(d=[], w=10, w2=5, beishu=6):
+def getwrong(d, w=10, w2=5, beishu=6):
     wrongdata = []
 
     xxx = [ii for ii in range(0, w)]
@@ -175,7 +183,7 @@ def getwrong(d=[], w=10, w2=5, beishu=6):
             else:
                 i=i+1
         wrongdata.append(temp)
-    return wrongdata
+    return wrongdata,d
 
 
 
@@ -189,8 +197,13 @@ for i in df.columns:
             df[i][j] = meaninterp_column(df[i], j)
 # 转LIST
 df = dftolist(df)
+
+
+
 # 获取异常数据
-daa=df.copy()
-wrongdata = getwrong(d=daa)
+daa=copy.deepcopy(df)
+wrongdata,df_fix = getwrong(daa)
 #画图
-printgraph(df, wrongdata, [3, 4, 5, 6, 7, 8, 9])
+
+
+printgraph(df, wrongdata, [3, 4, 5, 6, 7, 8, 9],df_fix)

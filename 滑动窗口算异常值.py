@@ -20,7 +20,7 @@ name = ['ch4', 'c2h6', 'c2h4', 'c2h2', 'h2', 'co', 'co2', 'water']
 
 
 # 获取数据
-def read_mysql(sql='select * from test.total where transformer like \'省检修分公司苏州分部车坊变特工变电沈阳变压器集团有限公司1号主变A相\' '):  # 读取数据
+def read_mysql(sql='select * from test.total where transformer like \'省检修分公司苏州分部车坊变特工变电沈阳变压器集团有限公司3号主变C相\' '):  # 读取数据
     try:
         conn = pymysql.connect(host="localhost", user="root", password="123456789", db="test", port=3306,
                                charset='utf8')
@@ -51,7 +51,7 @@ def ployinterp_column(s, n, k=5):
     return lagrange(y.index, list(y))(n)
 
 
-# 平均值插值
+# 平均值插值aa
 def meaninterp_column(s, n, k=5):
     y = s[list(range(n - k, n)) + list(range(n + 1, n + 1 + k))]
     y = y[y.notnull()]
@@ -64,49 +64,49 @@ def dftolist(df):
     return train_x_list
 
 
-def getwrongbypoly(df=[], w=5, wucha=0.13):
-    ans = []
-    x = [ii for ii in range(0, w)]
-    for j in range(3, 11):
-        for i in range(w, len(df)):
-            t1 = []
-            t2 = []
-            for k in range(i - w, i):
-                t1.append(df[k][j])
-            y = t1
-            z1 = np.polyfit(x, y, 1)
-            p1 = np.poly1d(z1)
-            kk = z1[0] * (w) + z1[1]
-            tt = df[i][j] - kk
-            # print(tt,' ',kk,' ',df[i][j])
-            if (abs(tt) / kk) > wucha:
-                ans.append(df[i])
-    print(ans.__len__())
-    return ans
-
-
-def getwronglunwen(df=[], w=10, wucha=2):
-    ans = []
-    for j in range(3, 11):
-        for i in range(w + 1, len(df)):
-            t1 = []
-            t2 = []
-            for k in range(i - w, i):
-                t1.append(df[k][j])
-                t2.append(df[k][j] - df[k - 1][j])
-            avg1 = sum(t1) / t1.__len__()
-            avgz = sum(t2) / t2.__len__()
-            avg = avg1 + avgz * w / 2
-            tt = df[i][j] - avg
-            # print(tt,' ',avg,' ',df[i][j])
-            if avg != 0 and (abs(tt) / avg) > wucha:
-                print(tt, ' ', avg, ' ', df[i][j])
-                df[i].append((name[j - 3], j, avg))
-                ans.append(df[i])
-    print(ans.__len__())
-    pd.DataFrame(df).to_excel('C:/Users/Alex/Desktop/T.xls')
-    return ans
-
+# def getwrongbypoly(df=[], w=5, wucha=0.13):
+#     ans = []
+#     x = [ii for ii in range(0, w)]
+#     for j in range(3, 11):
+#         for i in range(w, len(df)):
+#             t1 = []
+#             t2 = []
+#             for k in range(i - w, i):
+#                 t1.append(df[k][j])
+#             y = t1
+#             z1 = np.polyfit(x, y, 1)
+#             p1 = np.poly1d(z1)
+#             kk = z1[0] * (w) + z1[1]
+#             tt = df[i][j] - kk
+#             # print(tt,' ',kk,' ',df[i][j])
+#             if (abs(tt) / kk) > wucha:
+#                 ans.append(df[i])
+#     print(ans.__len__())
+#     return ans
+#
+#
+# def getwronglunwen(df=[], w=10, wucha=2):
+#     ans = []
+#     for j in range(3, 11):
+#         for i in range(w + 1, len(df)):
+#             t1 = []
+#             t2 = []
+#             for k in range(i - w, i):
+#                 t1.append(df[k][j])
+#                 t2.append(df[k][j] - df[k - 1][j])
+#             avg1 = sum(t1) / t1.__len__()
+#             avgz = sum(t2) / t2.__len__()
+#             avg = avg1 + avgz * w / 2
+#             tt = df[i][j] - avg
+#             # print(tt,' ',avg,' ',df[i][j])
+#             if avg != 0 and (abs(tt) / avg) > wucha:
+#                 print(tt, ' ', avg, ' ', df[i][j])
+#                 df[i].append((name[j - 3], j, avg))
+#                 ans.append(df[i])
+#     print(ans.__len__())
+#     pd.DataFrame(df).to_excel('C:/Users/Alex/Desktop/T.xls')
+#     return ans
+#
 
 def printgraph(df=[], wrongdata=[], lieshu=[3],df_fix=[]):
     for row in lieshu:
@@ -135,12 +135,13 @@ def printgraph(df=[], wrongdata=[], lieshu=[3],df_fix=[]):
         plt.scatter(xx0, yy0, c='y', marker='>', zorder=2)
         plt.title(name[row - 3], fontsize=12)
         plt.plot(x, y,zorder=1)
-        plt.plot(xfix, yfix, c='k', zorder=0)
+        # plt.plot(xfix, yfix, c='k', zorder=0)
+        plt.xlim(735954.1918969348,736154.1918969348)
         plt.show()
     return
 
 
-def getwrong(d, w=10, w2=5, beishu=6):
+def getwrong(d, w=50, w2=10, beishu=5):
     wrongdata = []
 
     xxx = [ii for ii in range(0, w)]
@@ -169,14 +170,17 @@ def getwrong(d, w=10, w2=5, beishu=6):
                 # kk=1 传感器 0 变压器异常
                 for t in range(i, min(i + w2, len(d))):
                     xt = w + t - i
-                    yt = xt * z1[0] + z1[1]
+                    # yt = xt * z1[0] + z1[1]
+                    yt=avg1
                     if d[t][j] < yt + beishu * avgz and d[t][j] > yt - beishu * avgz:
                         kk = 1
                 for t in range(i, min(i + w2, len(d))):
                     xt = w + t - i
-                    yt = xt * z1[0] + z1[1]
+                    # yt = xt * z1[0] + z1[1]
+                    yt = avg1
                     if not (d[t][j] < yt + beishu * avgz and d[t][j] > yt - beishu * avgz):
                         temp.append([t, d[t][2], d[t][j], kk])
+
                     if kk:
                         d[t][j]=yt
                 i=min(i + w2, len(d))

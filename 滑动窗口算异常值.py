@@ -44,12 +44,6 @@ def read_mysql(sql='select * from test.total where transformer like \'省检修�
     return df
 
 
-# 弗洛伊德插值
-def ployinterp_column(s, n, k=5):
-    y = s[list(range(n - k, n)) + list(range(n + 1, n + 1 + k))]
-    y = y[y.notnull()]
-    return lagrange(y.index, list(y))(n)
-
 
 # 平均值插值aa
 def meaninterp_column(s, n, k=5):
@@ -57,57 +51,14 @@ def meaninterp_column(s, n, k=5):
     y = y[y.notnull()]
     return sum(y) / len(y)
 
-
+#DATAFRAME转LIST
 def dftolist(df):
     train_data = np.array(df)
     train_x_list = train_data.tolist()
     return train_x_list
 
 
-# def getwrongbypoly(df=[], w=5, wucha=0.13):
-#     ans = []
-#     x = [ii for ii in range(0, w)]
-#     for j in range(3, 11):
-#         for i in range(w, len(df)):
-#             t1 = []
-#             t2 = []
-#             for k in range(i - w, i):
-#                 t1.append(df[k][j])
-#             y = t1
-#             z1 = np.polyfit(x, y, 1)
-#             p1 = np.poly1d(z1)
-#             kk = z1[0] * (w) + z1[1]
-#             tt = df[i][j] - kk
-#             # print(tt,' ',kk,' ',df[i][j])
-#             if (abs(tt) / kk) > wucha:
-#                 ans.append(df[i])
-#     print(ans.__len__())
-#     return ans
-#
-#
-# def getwronglunwen(df=[], w=10, wucha=2):
-#     ans = []
-#     for j in range(3, 11):
-#         for i in range(w + 1, len(df)):
-#             t1 = []
-#             t2 = []
-#             for k in range(i - w, i):
-#                 t1.append(df[k][j])
-#                 t2.append(df[k][j] - df[k - 1][j])
-#             avg1 = sum(t1) / t1.__len__()
-#             avgz = sum(t2) / t2.__len__()
-#             avg = avg1 + avgz * w / 2
-#             tt = df[i][j] - avg
-#             # print(tt,' ',avg,' ',df[i][j])
-#             if avg != 0 and (abs(tt) / avg) > wucha:
-#                 print(tt, ' ', avg, ' ', df[i][j])
-#                 df[i].append((name[j - 3], j, avg))
-#                 ans.append(df[i])
-#     print(ans.__len__())
-#     pd.DataFrame(df).to_excel('C:/Users/Alex/Desktop/T.xls')
-#     return ans
-#
-
+#画图
 def printgraph(df=[], wrongdata=[], lieshu=[3],df_fix=[]):
     for row in lieshu:
 
@@ -140,7 +91,7 @@ def printgraph(df=[], wrongdata=[], lieshu=[3],df_fix=[]):
         plt.show()
     return
 
-
+#计算异常值
 def getwrong(d, w=50, w2=10, beishu=5):
     wrongdata = []
 
@@ -194,14 +145,13 @@ def getwrong(d, w=50, w2=10, beishu=5):
 # 读取数据
 df = read_mysql()
 
-# 插值
+# 平均值插值
 for i in df.columns:
     for j in range(len(df)):
         if (df[i].isnull())[j]:
             df[i][j] = meaninterp_column(df[i], j)
 # 转LIST
 df = dftolist(df)
-
 
 
 # 获取异常数据
@@ -211,3 +161,4 @@ wrongdata,df_fix = getwrong(daa)
 
 
 printgraph(df, wrongdata, [3, 4, 5, 6, 7, 8, 9],df_fix)
+

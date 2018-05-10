@@ -2,19 +2,13 @@
 import copy
 
 import numpy as np
-import math
+
 import pymysql
-import matplotlib as plb
+
 import pandas as pd
-import statsmodels
-import datetime as dt
-import sklearn
-import scipy
-from sklearn.cluster import DBSCAN
+
 import matplotlib.pyplot as plt
 import sqlalchemy
-import Apriori
-from scipy.interpolate import lagrange
 
 name = ['ch4', 'c2h6', 'c2h4', 'c2h2', 'h2', 'co', 'co2', 'water']
 

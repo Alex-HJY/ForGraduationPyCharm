@@ -1,20 +1,9 @@
 # coding=utf-8
-import copy
 
 import numpy as np
-import math
-import pymysql
-import matplotlib as plb
 import pandas as pd
-import statsmodels
-import datetime as dt
-import sklearn
-import scipy
-from sklearn.cluster import DBSCAN
-import matplotlib.pyplot as plt
-import sqlalchemy
-import Apriori
-from scipy.interpolate import lagrange
+
+from Apriori import Apriori
 
 name = ['CH4', 'C2H6', 'C2H4', 'C2H2', 'H2', '故障类型']
 

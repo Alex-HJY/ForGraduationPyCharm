@@ -32,13 +32,13 @@ problems=['低温过热','高温过热','低能放电','高能放电']
 
 
 def read_training_data():
-    df = pd.read_excel('./input58.xls')
+    df = pd.read_excel('./data/input58.xls')
     train_data = np.array(df).tolist()
     return train_data
 
 
 def read_test_data():
-    df = pd.read_excel('./testinput58.xls')
+    df = pd.read_excel('./data/testinput58.xls')
     train_data = np.array(df).tolist()
     return train_data
 
@@ -70,8 +70,8 @@ def data_analyse(df):
     # print("所有候选项集的支持度信息：", suppData)
     # print("关联规则：", rules)
     rules.sort()
-    pd.Series(rules).to_excel('./rules-guzhang.xls')
-    pd.Series(suppData).to_excel('./suppData-guzhang.xls')
+    pd.Series(rules).to_excel('./data/rules-guzhang.xls')
+    pd.Series(suppData).to_excel('./data/suppData-guzhang.xls')
     return rules
 
 
